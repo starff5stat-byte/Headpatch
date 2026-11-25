@@ -32,6 +32,17 @@ object PatchEngine {
         ctx.packageManager.getPackageInfo(FF, 0).versionName
     } catch (e: PackageManager.NameNotFoundException) { null }
 
+    private fun spawn(cmd: Array<String>): Process {
+        val m = Shizuku::class.java.declaredMethods.firstOrNull { it.name == "newProcess" }
+            ?: throw IllegalStateException("newProcess missing")
+        m.isAccessible = true
+        return when (m.parameterTypes.size) {
+            3 -> m.invoke(null, *arrayOf<Any?>(cmd, null, null)) as Process
+            1 -> m.invoke(null, cmd as Any) as Process
+            else -> throw IllegalStateException("arity " + m.parameterTypes.size)
+        }
+    }
+
     fun run(ctx: Context, action: String, set: PatchSet): String {
         val src = HelperInstaller.ensure(ctx)
         val tmp = "ffhs_" + Integer.toHexString(kotlin.random.Random.nextInt(0xFFFFF))
@@ -47,7 +58,11 @@ object PatchEngine {
         }
         val cmd = "cp '$src' /data/local/tmp/$tmp && chmod 755 /data/local/tmp/$tmp && " +
                 "/data/local/tmp/$tmp --action $action --lib ${set.lib}; rm -f /data/local/tmp/$tmp"
-        val p = Shizuku.newProcess(arrayOf("/system/bin/sh", "-c", cmd), null, null)
+        val p = try {
+            spawn(arrayOf("/system/bin/sh", "-c", cmd))
+        } catch (e: Exception) {
+            return "{\"ok\":false,\"err\":\"spawn:" + (e.message ?: "?") + "\"}"
+        }
         p.outputStream.use { it.write(sb.toString().toByteArray()) }
         val out = p.inputStream.bufferedReader().readText().trim()
         val err = p.errorStream.bufferedReader().readText().trim()
