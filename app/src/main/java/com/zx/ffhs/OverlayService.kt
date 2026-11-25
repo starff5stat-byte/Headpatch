@@ -8,7 +8,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -16,12 +18,14 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 
 class OverlayService : Service() {
     private lateinit var wm: WindowManager
     private lateinit var bubble: TextView
     private lateinit var menu: LinearLayout
     private lateinit var set: PatchSet
+    private val main = Handler(Looper.getMainLooper())
 
     override fun onCreate() {
         super.onCreate()
@@ -55,7 +59,7 @@ class OverlayService : Service() {
             setOnCheckedChangeListener { _, on ->
                 Thread {
                     val r = PatchEngine.run(this@OverlayService, if (on) "apply" else "restore", set)
-                    runOnUiThread { toastLog(r) }
+                    main.post { Toast.makeText(this@OverlayService, r.take(80), Toast.LENGTH_SHORT).show() }
                 }.start()
             }
         }
@@ -65,11 +69,7 @@ class OverlayService : Service() {
         })
         menu.addView(row("Exit") { stopSelf() })
 
-        wm.addView(menu, params().apply { x = 40; y = 260 })
-    }
-
-    private fun toastLog(s: String) {
-        android.widget.Toast.makeText(this, s.take(80), android.widget.Toast.LENGTH_SHORT).show()
+        wm.addView(menu, params().apply { x = 40; y = 300 })
     }
 
     private fun row(t: String, f: () -> Unit) = TextView(this).apply {
@@ -110,7 +110,7 @@ class OverlayService : Service() {
         else WindowManager.LayoutParams.TYPE_PHONE,
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
         PixelFormat.TRANSLUCENT
-    ).apply { gravity = Gravity.TOP or Gravity.START; x = 40; y = 260 }
+    ).apply { gravity = Gravity.TOP or Gravity.START; x = 40; y = 300 }
 
     override fun onBind(i: Intent?): IBinder? = null
 
