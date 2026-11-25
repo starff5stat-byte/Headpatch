@@ -11,7 +11,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import dev.rikka.shizuku.Shizuku
+import rikka.shizuku.Shizuku
 
 class MainActivity : AppCompatActivity() {
     private lateinit var log: TextView
