@@ -2,8 +2,8 @@ package com.zx.ffhs
 
 import android.content.Context
 import android.content.pm.PackageManager
-import dev.rikka.shizuku.Shizuku
 import org.json.JSONObject
+import rikka.shizuku.Shizuku
 import java.io.File
 
 object PatchEngine {
