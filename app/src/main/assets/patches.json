@@ -1,0 +1,13 @@
+{
+  "gameVersion": "1.108.1",
+  "lib": "libil2cpp.so",
+  "patches": [],
+  "strings": [
+    {
+      "name": "aim_bone_chest_to_head",
+      "find": "Bip001chest",
+      "repl": "Bip001head",
+      "enabled": true
+    }
+  ]
+}
